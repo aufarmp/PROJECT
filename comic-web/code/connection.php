@@ -6,7 +6,7 @@
 
     $conn = mysqli_connect($host, $user, $pass, $db);
     
-    //Cek koneksi jika terjadi kegagalan
+    // Cek koneksi jika terjadi kegagalan
     if(!$conn){
         die("Koneksi gagal: " . mysqli_connect_error());
     }

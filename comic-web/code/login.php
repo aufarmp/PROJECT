@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         
         $_SESSION['login_error'] = "Invalid username/email or password.";
-        header("Location: login.php"); // Tetap di halaman Login
+        header("Location: login.php");
         exit();
     }
 }

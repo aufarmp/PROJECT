@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $role = 'user'; // Jika ada registrasi akun baru, role akan selalu 'user'
+    $role = 'user'; // jika ada registrasi akun baru, role akan selalu 'user'
     $insert_sql = "INSERT INTO tb_user (username, email, password, role) VALUES (?, ?, ?, ?)";
     $stmt_insert = mysqli_prepare($conn, $insert_sql);
     mysqli_stmt_bind_param($stmt_insert, "ssss", $username, $email, $password, $role);
