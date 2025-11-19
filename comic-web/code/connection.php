@@ -1,7 +1,7 @@
 <?php
     $host = "mysql";
     $user = "root";
-    $pass = "";
+    $pass = "password";
     $db   = "db_komik";
 
     $conn = mysqli_connect($host, $user, $pass, $db);
