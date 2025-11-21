@@ -252,4 +252,4 @@ $profile_pic = !empty($user_data['profile_picture_url']) ? $user_data['profile_p
         });
     </script>
 </body>
-</html>
+</html> 
