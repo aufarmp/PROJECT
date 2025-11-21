@@ -95,7 +95,7 @@ if (isset($_GET['delete_id'])) {
                             echo '<td>' . $genre['genre_id'] . '</td>';
                             echo '<td>' . htmlspecialchars($genre['name']) . '</td>';
                             echo '<td>
-                                    <a href="manage_genres.php?delete_id=' . $genre['genre_id'] . '" class="action-btn delete-btn" onclick="return confirm(\'Are you sure you want to delete this genre?\');">Delete</a>
+                                    <a href="#" class="action-btn delete-btn" onclick="showDeleteGenreModal(' . $genre['genre_id'] . ', \'' . htmlspecialchars(addslashes($genre['name'])) . '\'); return false;">Delete</a>
                                   </td>';
                             echo '</tr>';
                         }
@@ -104,5 +104,50 @@ if (isset($_GET['delete_id'])) {
             </table>
         </div>
     </div>
+
+    <!-- Delete Genre Confirmation Modal -->
+    <div class="modal-overlay" id="deleteGenreModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Delete Genre</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the genre "<span id="genreName"></span>"?</p>
+                <div class="modal-body warning">
+                    <strong>Note:</strong> This will also remove this genre from all comics that have it assigned.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn cancel" onclick="hideDeleteGenreModal()">Cancel</button>
+                <a href="#" class="modal-btn confirm" id="confirmDeleteGenreBtn">Delete Genre</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteGenreModal(genreId, genreName) {
+            document.getElementById('genreName').textContent = genreName;
+            document.getElementById('confirmDeleteGenreBtn').href = 'manage_genres.php?delete_id=' + genreId;
+            document.getElementById('deleteGenreModal').classList.add('active');
+        }
+
+        function hideDeleteGenreModal() {
+            document.getElementById('deleteGenreModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteGenreModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteGenreModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteGenreModal();
+            }
+        });
+    </script>
 </body>
 </html>

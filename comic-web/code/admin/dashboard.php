@@ -72,7 +72,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                             echo '<td>
                                     <a href="manage_chapters.php?id=' . $comic['komik_id'] . '" class="action-btn edit-btn" style="background-color: #f39c12;">Chapters</a>
                                     <a href="edit_comic.php?id=' . $comic['komik_id'] . '" class="action-btn edit-btn">Edit</a>
-                                    <a href="delete_comic.php?id=' . $comic['komik_id'] . '" class="action-btn delete-btn" onclick="return confirm(\'Are you sure you want to delete this comic and ALL its chapters/pages?\');">Delete</a>
+                                    <a href="#" class="action-btn delete-btn" onclick="showDeleteComicModal(' . $comic['komik_id'] . ', \'' . htmlspecialchars(addslashes($comic['title'])) . '\'); return false;">Delete</a>
                                 </td>';
                             echo '</tr>';
                         }
@@ -81,5 +81,50 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             </table>
         </div>
     </div>
+
+    <!-- Delete Comic Confirmation Modal -->
+    <div class="modal-overlay" id="deleteComicModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Delete Comic</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "<span id="comicTitle"></span>"?</p>
+                <div class="modal-body warning">
+                    <strong>Warning:</strong> This action will also delete ALL chapters and pages associated with this comic. This cannot be undone!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn cancel" onclick="hideDeleteComicModal()">Cancel</button>
+                <a href="#" class="modal-btn confirm" id="confirmDeleteComicBtn">Delete Comic</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteComicModal(comicId, comicTitle) {
+            document.getElementById('comicTitle').textContent = comicTitle;
+            document.getElementById('confirmDeleteComicBtn').href = 'delete_comic.php?id=' + comicId;
+            document.getElementById('deleteComicModal').classList.add('active');
+        }
+
+        function hideDeleteComicModal() {
+            document.getElementById('deleteComicModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteComicModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteComicModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteComicModal();
+            }
+        });
+    </script>
 </body>
 </html>
