@@ -38,7 +38,7 @@ if (isset($_GET['remove_history_id'])) {
                 <a href="bookmark.php" class="nav-button">My Bookmarks</a>
                 <a href="history.php" class="nav-button">History</a>
                 <a href="profile.php" class="nav-button">Profile</a> 
-                <a href="../logout.php" class="nav-button logout-button" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+                <a href="#" class="nav-button logout-button" onclick="showLogoutModal(event)">Logout</a>
             </div>
 
         <div class="main-content">
@@ -92,7 +92,44 @@ if (isset($_GET['remove_history_id'])) {
                 <p>&copy; <?php echo date("Y"); ?> Comic Web Project</p>
             </footer>
         </div>
-    </div>
 
+        <!-- Logout Confirmation Modal -->
+        <div id="logoutModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Confirm Logout</h3>
+                <p>Are you sure you want to log out?</p>
+                <div class="modal-buttons">
+                    <a href="../logout.php" class="modal-btn confirm">Yes, Logout</a>
+                    <button class="modal-btn cancel" onclick="closeLogoutModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function showLogoutModal(event) {
+            event.preventDefault();
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside the modal content
+        document.getElementById('logoutModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeLogoutModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLogoutModal();
+            }
+        });
+        </script>
+
+    </div>
 </body>
 </html>
