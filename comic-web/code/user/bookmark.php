@@ -35,7 +35,7 @@ if (isset($_GET['remove_id'])) {
         <div class="sidebar">
             <h2>Comic Web</h2>
             <a href="homepage.php" class="nav-button">Browse</a>
-            <a href="bookmark.php" class="nav-button">My Bookmarks</a>
+            <a href="bookmark.php" class="nav-button active">My Bookmarks</a>
             <a href="history.php" class="nav-button">History</a>
             <a href="profile.php" class="nav-button">Profile</a> 
             <a href="../logout.php" class="nav-button logout-button" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
@@ -70,7 +70,7 @@ if (isset($_GET['remove_id'])) {
                         echo '      <h3>' . htmlspecialchars($comic['title']) . '</h3>';
                         echo '      <p>By: ' . htmlspecialchars($comic['author']) . '</p>';
                         echo '      <a href="comic_details.php?id=' . $comic['komik_id'] . '" class="read-more-btn">Read More</a>';
-                        echo '      <a href="bookmark.php?remove_id=' . $comic['komik_id'] . '" class="remove-btn" onclick="return confirm(\'Remove this bookmark?\');">Remove</a>';
+                        echo '      <button class="remove-btn" onclick="showRemoveModal(' . $comic['komik_id'] . ', \'' . htmlspecialchars(addslashes($comic['title'])) . '\')">Remove</button>';
                         echo '  </div>';
                         echo '</div>';
                     }
@@ -80,11 +80,65 @@ if (isset($_GET['remove_id'])) {
                 ?>
             </div>
 
+            <!-- Remove Confirmation Modal -->
+            <div class="modal-overlay" id="removeModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Remove Bookmark</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove "<span id="comicTitle"></span>" from your bookmarks?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn cancel" onclick="hideRemoveModal()">Cancel</button>
+                        <button type="button" class="modal-btn confirm" id="confirmRemoveBtn">Remove</button>
+                    </div>
+                </div>
+            </div>
+
             <footer class="content-footer">
                 <p>&copy; <?php echo date("Y"); ?> Comic Web Project</p>
             </footer>
         </div>
     </div>
+
+    <script>
+        let currentRemoveId = null;
+
+        function showRemoveModal(comicId, comicTitle) {
+            currentRemoveId = comicId;
+            document.getElementById('comicTitle').textContent = comicTitle;
+            document.getElementById('removeModal').classList.add('active');
+        }
+
+        function hideRemoveModal() {
+            document.getElementById('removeModal').classList.remove('active');
+            currentRemoveId = null;
+        }
+
+        function confirmRemove() {
+            if (currentRemoveId) {
+                window.location.href = 'bookmark.php?remove_id=' + currentRemoveId;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('confirmRemoveBtn').addEventListener('click', confirmRemove);
+
+        // Close modal when clicking outside
+        document.getElementById('removeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideRemoveModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideRemoveModal();
+            }
+        });
+    </script>
 
 </body>
 </html>

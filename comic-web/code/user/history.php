@@ -36,7 +36,7 @@ if (isset($_GET['remove_history_id'])) {
                 <h2>Comic Web</h2>
                 <a href="homepage.php" class="nav-button">Browse</a>
                 <a href="bookmark.php" class="nav-button">My Bookmarks</a>
-                <a href="history.php" class="nav-button">History</a>
+                <a href="history.php" class="nav-button active">History</a>
                 <a href="profile.php" class="nav-button">Profile</a> 
                 <a href="../logout.php" class="nav-button logout-button" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </div>
@@ -78,7 +78,7 @@ if (isset($_GET['remove_history_id'])) {
                         echo '      <p>Last read: Ch. ' . htmlspecialchars($item['chapter_number']) . '</p>';
                         echo '      <p style="font-size: 12px; color: #888;">' . date('M d, Y H:i', strtotime($item['last_read_at'])) . '</p>';
                         echo '      <a href="reader.php?id=' . $item['chapter_id'] . '" class="read-more-btn">Continue Reading</a>';
-                        echo '      <a href="history.php?remove_history_id=' . $item['history_id'] . '" class="remove-btn" onclick="return confirm(\'Remove this history entry?\');">Remove</a>';
+                        echo '      <button class="remove-btn" onclick="showRemoveModal(' . $item['history_id'] . ', \'' . htmlspecialchars(addslashes($item['comic_title'])) . '\', \'Ch. ' . htmlspecialchars(addslashes($item['chapter_number'])) . '\')">Remove</button>';
                         echo '  </div>';
                         echo '</div>';
                     }
@@ -88,11 +88,66 @@ if (isset($_GET['remove_history_id'])) {
                 ?>
             </div>
 
+            <!-- Remove Confirmation Modal -->
+            <div class="modal-overlay" id="removeModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Remove History Entry</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove the reading history for "<span id="comicTitle"></span>" (Chapter <span id="chapterInfo"></span>)?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn cancel" onclick="hideRemoveModal()">Cancel</button>
+                        <button type="button" class="modal-btn confirm" id="confirmRemoveBtn">Remove</button>
+                    </div>
+                </div>
+            </div>
+
             <footer class="content-footer">
                 <p>&copy; <?php echo date("Y"); ?> Comic Web Project</p>
             </footer>
         </div>
     </div>
+
+    <script>
+        let currentRemoveId = null;
+
+        function showRemoveModal(historyId, comicTitle, chapterInfo) {
+            currentRemoveId = historyId;
+            document.getElementById('comicTitle').textContent = comicTitle;
+            document.getElementById('chapterInfo').textContent = chapterInfo;
+            document.getElementById('removeModal').classList.add('active');
+        }
+
+        function hideRemoveModal() {
+            document.getElementById('removeModal').classList.remove('active');
+            currentRemoveId = null;
+        }
+
+        function confirmRemove() {
+            if (currentRemoveId) {
+                window.location.href = 'history.php?remove_history_id=' + currentRemoveId;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('confirmRemoveBtn').addEventListener('click', confirmRemove);
+
+        // Close modal when clicking outside
+        document.getElementById('removeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideRemoveModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideRemoveModal();
+            }
+        });
+    </script>
 
 </body>
 </html>
