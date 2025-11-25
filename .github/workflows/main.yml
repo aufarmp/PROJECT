@@ -1,25 +1,46 @@
-name: Simple Runner Test
+name: Deploy to Docker
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-  test-runner:
-    runs-on: webcomic-project
+  deploy:
+    runs-on: [self-hosted, webcomic-project]
 
     steps:
-      # Step 1: Checkout kode ke runner
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Test version
+        run: echo "VERSION 3"
 
-      # Step 2: Menampilkan pesan sederhana
-      - name: Say Hello
-        run: echo "Hello from Self-Hosted Runner!"
+      # 1. Checkout kode dari GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # Step 3: Menampilkan informasi Git
-      - name: Show Git Info
+      # 2. Set up Docker (optional kalau docker belum jalan)
+      - name: Ensure Docker is running
         run: |
-          echo "Repo: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref }}"
-          echo "Commit SHA: ${{ github.sha }}"
+          service docker start || true
+
+      # 3. Show docker info
+      - name: Docker info
+        run: docker info
+
+      # 4. Pull latest images (optional)
+      - name: Pull latest images
+        run: docker compose pull || true
+
+      # 5. Stop container lama
+      - name: Stop existing containers
+        run: docker compose down || true
+
+      # 6. Build ulang project
+      - name: Build images
+        run: docker compose build --no-cache
+
+      # 7. Start container baru
+      - name: Start containers
+        run: docker compose up -d
+
+      # 8. Check running status
+      - name: Check running containers
+        run: docker ps -a
