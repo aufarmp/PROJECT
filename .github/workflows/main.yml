@@ -1,0 +1,25 @@
+name: Simple Runner Test
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  test-runner:
+    runs-on: [self-hosted, linux, X64, webcomic-project] 
+
+    steps:
+      # Step 1: Checkout kode ke runner
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Menampilkan pesan sederhana
+      - name: Say Hello
+        run: echo "Hello from Self-Hosted Runner!"
+
+      # Step 3: Menampilkan informasi Git
+      - name: Show Git Info
+        run: |
+          echo "Repo: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit SHA: ${{ github.sha }}"
