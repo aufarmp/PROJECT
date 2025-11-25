@@ -11,4 +11,4 @@ WORKDIR /var/www/myphpapp
 RUN chown -R www-data:www-data /var/www/myphpapp 
  
 # Expose port 9000 untuk PHP-FPM 
-EXPOSE 9000 
+EXPOSE 9000
