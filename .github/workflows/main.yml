@@ -6,7 +6,7 @@ on:
 
 jobs:
   test-runner:
-    runs-on: [self-hosted, linux, X64, webcomic-project] 
+    runs-on: webcomic-project
 
     steps:
       # Step 1: Checkout kode ke runner
