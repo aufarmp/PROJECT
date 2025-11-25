@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, webcomic-project]
+    runs-on: webcomic-project
 
     steps:
       - name: Test version
