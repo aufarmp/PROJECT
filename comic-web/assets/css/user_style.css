@@ -359,7 +359,6 @@ body {
     font-weight: bold;
     margin-top: 10px; 
     transition: background-color 0.3s;
-    cursor: pointer;
 }
 .remove-btn:hover {
     background-color: #c0392b; 
