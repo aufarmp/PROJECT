@@ -78,7 +78,7 @@ if (isset($_GET['remove_history_id'])) {
                         echo '      <p>Last read: Ch. ' . htmlspecialchars($item['chapter_number']) . '</p>';
                         echo '      <p style="font-size: 12px; color: #888;">' . date('M d, Y H:i', strtotime($item['last_read_at'])) . '</p>';
                         echo '      <a href="reader.php?id=' . $item['chapter_id'] . '" class="read-more-btn">Continue Reading</a>';
-                        echo '      <a href="history.php?remove_history_id=' . $item['history_id'] . '" class="remove-btn" onclick="return confirm(\'Remove this history entry?\');">Remove</a>';
+                        echo '      <button class="remove-btn" onclick="showRemoveHistoryModal(' . $item['history_id'] . ', \'' . htmlspecialchars(addslashes($item['comic_title'])) . '\', ' . $item['chapter_number'] . ')">Remove</button>';
                         echo '  </div>';
                         echo '</div>';
                     }
@@ -105,6 +105,18 @@ if (isset($_GET['remove_history_id'])) {
             </div>
         </div>
 
+        <!-- Remove History Confirmation Modal -->
+        <div id="removeHistoryModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Remove History</h3>
+                <p id="removeHistoryText">Are you sure you want to remove this reading history?</p>
+                <div class="modal-buttons">
+                    <a href="#" id="removeHistoryConfirm" class="modal-btn confirm">Yes, Remove</a>
+                    <button class="modal-btn cancel" onclick="closeRemoveHistoryModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <script>
         function showLogoutModal(event) {
             event.preventDefault();
@@ -115,17 +127,38 @@ if (isset($_GET['remove_history_id'])) {
             document.getElementById('logoutModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside the modal content
+        function showRemoveHistoryModal(historyId, comicTitle, chapterNumber) {
+            document.getElementById('removeHistoryText').textContent = 
+                'Are you sure you want to remove "' + comicTitle + ' (Chapter ' + chapterNumber + ')" from your reading history?';
+            
+            const confirmLink = document.getElementById('removeHistoryConfirm');
+            confirmLink.href = 'history.php?remove_history_id=' + historyId;
+            
+            document.getElementById('removeHistoryModal').style.display = 'flex';
+        }
+
+        function closeRemoveHistoryModal() {
+            document.getElementById('removeHistoryModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside the modal content
         document.getElementById('logoutModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeLogoutModal();
             }
         });
 
-        // Close modal with Escape key
+        document.getElementById('removeHistoryModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeRemoveHistoryModal();
+            }
+        });
+
+        // Close modals with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLogoutModal();
+                closeRemoveHistoryModal();
             }
         });
         </script>

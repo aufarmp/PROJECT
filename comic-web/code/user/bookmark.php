@@ -70,7 +70,7 @@ if (isset($_GET['remove_id'])) {
                         echo '      <h3>' . htmlspecialchars($comic['title']) . '</h3>';
                         echo '      <p>By: ' . htmlspecialchars($comic['author']) . '</p>';
                         echo '      <a href="comic_details.php?id=' . $comic['komik_id'] . '" class="read-more-btn">Read More</a>';
-                        echo '      <a href="bookmark.php?remove_id=' . $comic['komik_id'] . '" class="remove-btn" onclick="return confirm(\'Remove this bookmark?\');">Remove</a>';
+                        echo '      <button class="remove-btn" onclick="showRemoveBookmarkModal(' . $comic['komik_id'] . ', \'' . htmlspecialchars(addslashes($comic['title'])) . '\')">Remove</button>';
                         echo '  </div>';
                         echo '</div>';
                     }
@@ -97,6 +97,18 @@ if (isset($_GET['remove_id'])) {
             </div>
         </div>
 
+        <!-- Remove Bookmark Confirmation Modal -->
+        <div id="removeBookmarkModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Remove Bookmark</h3>
+                <p id="removeBookmarkText">Are you sure you want to remove this comic from your bookmarks?</p>
+                <div class="modal-buttons">
+                    <a href="#" id="removeBookmarkConfirm" class="modal-btn confirm">Yes, Remove</a>
+                    <button class="modal-btn cancel" onclick="closeRemoveBookmarkModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <script>
         function showLogoutModal(event) {
             event.preventDefault();
@@ -107,17 +119,38 @@ if (isset($_GET['remove_id'])) {
             document.getElementById('logoutModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside the modal content
+        function showRemoveBookmarkModal(comicId, comicTitle) {
+            document.getElementById('removeBookmarkText').textContent = 
+                'Are you sure you want to remove "' + comicTitle + '" from your bookmarks?';
+            
+            const confirmLink = document.getElementById('removeBookmarkConfirm');
+            confirmLink.href = 'bookmark.php?remove_id=' + comicId;
+            
+            document.getElementById('removeBookmarkModal').style.display = 'flex';
+        }
+
+        function closeRemoveBookmarkModal() {
+            document.getElementById('removeBookmarkModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside the modal content
         document.getElementById('logoutModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeLogoutModal();
             }
         });
 
-        // Close modal with Escape key
+        document.getElementById('removeBookmarkModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeRemoveBookmarkModal();
+            }
+        });
+
+        // Close modals with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLogoutModal();
+                closeRemoveBookmarkModal();
             }
         });
         </script>
