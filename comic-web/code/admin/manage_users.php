@@ -67,13 +67,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                             echo '<td>' . htmlspecialchars($user['role']) . '</td>';
                             echo '<td>
                                     <a href="edit_user.php?id=' . $user['user_id'] . '" class="action-btn edit-btn">Edit</a>
-                                    <a href="delete_user.php?id=' . $user['user_id'] . '" class="action-btn delete-btn" onclick="return confirm(\'Are you sure you want to delete this user?\');">Delete</a>
+                                    <a href="#" class="action-btn delete-btn" onclick="showDeleteModal(' . $user['user_id'] . ', \'' . htmlspecialchars(addslashes($user['username'])) . '\', \'user\')">Delete</a>
                                   </td>';
                             echo '</tr>';
                         }
                     ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="delete-modal-overlay">
+            <div class="delete-modal-content">
+                <h3>Confirm Delete</h3>
+                <p id="deleteMessage">Are you sure you want to delete this item?</p>
+                <div class="delete-modal-buttons">
+                    <a href="#" id="confirmDelete" class="delete-modal-btn confirm">Yes, Delete</a>
+                    <button class="delete-modal-btn cancel" onclick="closeDeleteModal()">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <!-- Logout Confirmation Modal -->
@@ -89,6 +101,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         </div>
 
         <script>
+        function showDeleteModal(id, name, type) {
+            event.preventDefault();
+            
+            let message = '';
+            let deleteUrl = '';
+            
+            if (type === 'comic') {
+                message = `Are you sure you want to delete the comic "${name}"? This will also delete ALL its chapters and pages. This action cannot be undone.`;
+                deleteUrl = `delete_comic.php?id=${id}`;
+            } else if (type === 'genre') {
+                message = `Are you sure you want to delete the genre "${name}"?`;
+                deleteUrl = `manage_genres.php?delete_id=${id}`;
+            } else if (type === 'user') {
+                message = `Are you sure you want to delete the user "${name}"?`;
+                deleteUrl = `delete_user.php?id=${id}`;
+            }
+            
+            document.getElementById('deleteMessage').textContent = message;
+            document.getElementById('confirmDelete').href = deleteUrl;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
         function showLogoutModal(event) {
             event.preventDefault();
             document.getElementById('logoutModal').style.display = 'flex';
@@ -98,16 +136,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             document.getElementById('logoutModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside the modal content
+        // Close modals when clicking outside the modal content
+        document.getElementById('deleteModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDeleteModal();
+            }
+        });
+
         document.getElementById('logoutModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeLogoutModal();
             }
         });
 
-        // Close modal with Escape key
+        // Close modals with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
+                closeDeleteModal();
                 closeLogoutModal();
             }
         });
