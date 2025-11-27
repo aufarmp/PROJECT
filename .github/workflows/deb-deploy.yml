@@ -54,7 +54,7 @@ jobs:
 
       # Step 6: Health check
       - name: Health check
-        run: curl -f http://localhost:8080 || exit 1
+        run: curl -f http://localhost:8085 || exit 1
 
       # Step 7: Deployment result
       - name: Notify deployment status
