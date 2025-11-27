@@ -1,0 +1,67 @@
+name: CI/CD Auto Pull and Rebuild
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  deploy-andi:
+    runs-on: [self-hosted]
+
+    steps:
+      # Step 0: Mencari folder project php-todo secara otomatis
+      - name: Set project path
+        run: |
+          PROJECT_PATH=$(find /home -name 'php-todo' -type d 2>/dev/null | head -1)
+          if [ -z "$PROJECT_PATH" ]; then
+            echo "❌ Error: Folder php-todo tidak ditemukan di /home"
+            exit 1
+          fi
+          echo "PROJECT_PATH=$PROJECT_PATH" >> $GITHUB_ENV
+          echo "✅ Found project at: $PROJECT_PATH"
+
+      # Step 1: Pull kode terbaru
+      - name: Pull latest changes
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          git fetch origin master
+          git reset --hard origin/master
+
+      # Step 2: Stop kontainer lama
+      - name: Stop existing containers
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: docker compose down || true
+
+      # Step 3: Bersihkan image lama
+      - name: Remove old images
+        run: |
+          docker system prune -f
+          docker image prune -a -f
+
+      # Step 4: Build dan jalankan container
+      - name: Build and start containers
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          docker compose build --no-cache
+          docker compose up -d
+
+      # Step 5: Tunggu service siap
+      - name: Wait for services
+        run: |
+          sleep 30
+          docker compose ps
+
+      # Step 6: Health Check aplikasi
+      - name: Health check
+        run: curl -f http://localhost:8080 || exit 1
+
+      # Step 7: Notifikasi hasil
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment berhasil di laptop-andi!"
+          else
+            echo "❌ Deployment gagal! Lihat log di atas."
+          fi
