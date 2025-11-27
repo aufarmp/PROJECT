@@ -9,40 +9,59 @@ jobs:
     runs-on: [laptop-par]
 
     steps:
-      - name: Test version
-        run: echo "VERSION 3"
-
-      # 1. Checkout kode dari GitHub
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # 2. Set up Docker (optional kalau docker belum jalan)
-      - name: Ensure Docker is running
+      # Step 0: Find your project folder automatically
+      - name: Set project path
         run: |
-          service docker start || true
+          PROJECT_PATH=$(find /home -name 'Project-Group-1---Webcomic' -type d 2>/dev/null | head -1)
+          if [ -z "$PROJECT_PATH" ]; then
+            echo "❌ Error: Folder Project-Group-1---Webcomic tidak ditemukan!"
+            exit 1
+          fi
+          echo "PROJECT_PATH=$PROJECT_PATH" >> $GITHUB_ENV
+          echo "✅ Found project at: $PROJECT_PATH"
 
-      # 3. Show docker info
-      - name: Docker info
-        run: docker info
+      # Step 1: Pull latest changes
+      - name: Pull latest changes
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          git fetch origin master
+          git reset --hard origin/master
 
-      # 4. Pull latest images (optional)
-      - name: Pull latest images
-        run: docker compose pull || true
-
-      # 5. Stop container lama
+      # Step 2: Stop existing containers
       - name: Stop existing containers
+        working-directory: ${{ env.PROJECT_PATH }}
         run: docker compose down || true
 
-      # 6. Build ulang project
-      - name: Build images
-        run: docker compose build --no-cache
+      # Step 3: Remove old images
+      - name: Remove old images
+        run: |
+          docker system prune -f
+          docker image prune -a -f
 
-      # 7. Start container baru
-      - name: Start containers
-        run: docker compose up -d
+      # Step 4: Build and start the app
+      - name: Build and start containers
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          docker compose build --no-cache
+          docker compose up -d
 
-      # 8. Check running status
-      - name: Check running containers
-        run: docker ps -a
+      # Step 5: Wait for services
+      - name: Wait for services
+        run: |
+          sleep 30
+          docker compose ps -a
 
+      # Step 6: Health check
+      - name: Health check
+        run: curl -f http://localhost:8085 || exit 1
 
+      # Step 7: Deployment result
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Deployment Successful"
+          else
+            echo "Deployment Error, Check the log."
+
+          fi
