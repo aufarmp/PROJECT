@@ -1,4 +1,4 @@
-name: Trigger Docker
+name: Trigger Docker in Laptop-Par
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [laptop-par]
 
     steps:
       - name: Test version
@@ -44,4 +44,5 @@ jobs:
       # 8. Check running status
       - name: Check running containers
         run: docker ps -a
+
 
