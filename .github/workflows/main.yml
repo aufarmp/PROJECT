@@ -1,4 +1,4 @@
-name: Deploy to Docker
+name: Trigger Docker
 
 on:
   push:
@@ -44,3 +44,4 @@ jobs:
       # 8. Check running status
       - name: Check running containers
         run: docker ps -a
+
