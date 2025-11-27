@@ -7,23 +7,47 @@ on:
 jobs:
   deploy:
     runs-on: [laptop-par]
+    
+    # Permission ini dibutuhkan agar GITHUB_TOKEN bisa melakukan fetch code
+    permissions:
+      contents: read 
 
     steps:
       # Step 0: Find your project folder automatically
       - name: Set project path
         run: |
+          # Mencari folder, limit ke 1 hasil
           PROJECT_PATH=$(find /home -name 'Project-Group-1---Webcomic' -type d 2>/dev/null | head -1)
+          
           if [ -z "$PROJECT_PATH" ]; then
             echo "❌ Error: Folder Project-Group-1---Webcomic tidak ditemukan!"
+            # Opsi: Jika tidak ketemu, buat foldernya di lokasi default runner
+            # mkdir -p Project-Group-1---Webcomic
+            # PROJECT_PATH="$PWD/Project-Group-1---Webcomic"
             exit 1
           fi
+          
           echo "PROJECT_PATH=$PROJECT_PATH" >> $GITHUB_ENV
           echo "✅ Found project at: $PROJECT_PATH"
 
-      # Step 1: Pull latest changes
+      # Step 1: Pull latest changes (DIPERBAIKI)
       - name: Pull latest changes
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
+          # Cek apakah folder ini sudah menjadi git repository?
+          if [ ! -d ".git" ]; then
+            echo "⚠️ .git directory not found. Initializing new git..."
+            git init
+            # Menambahkan remote origin menggunakan GITHUB_TOKEN agar aman & otomatis
+            git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          else
+            echo "✅ Git repository found. Updating remote URL..."
+            # Update URL jaga-jaga jika token/url berubah
+            git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          fi
+
+          # Lakukan fetch dan reset
+          echo "⬇️ Pulling changes..."
           git fetch origin master
           git reset --hard origin/master
 
@@ -48,6 +72,7 @@ jobs:
       # Step 5: Wait for services
       - name: Wait for services
         run: |
+          echo "⏳ Waiting for services to start..."
           sleep 30
           docker compose ps -a
 
@@ -60,8 +85,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "Deployment Successful"
+            echo "✅ Deployment Successful"
           else
-            echo "Deployment Error, Check the log."
-
+            echo "❌ Deployment Error, Check the log."
           fi
