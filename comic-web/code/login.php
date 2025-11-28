@@ -2,30 +2,53 @@
 session_start();
 include 'connection.php'; 
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-    $sql = "SELECT * FROM tb_user WHERE (username = '$username' OR email = '$username') AND password = '$password'";
-    $result = mysqli_query($conn, $sql);
+    // 1. Prepared statement untuk mencegah SQL Injection
+    $stmt = $conn->prepare("SELECT user_id, username, password, role FROM tb_user WHERE username = ? OR email = ?");
+    
+    $stmt->bind_param("ss", $username, $username);
+    
+    // Jalankan query
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if (mysqli_num_rows($result) == 1) {
-        $user = mysqli_fetch_assoc($result);
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['role'] = $user['role'];
-
-        if ($user['role'] == 'admin') {
-            header("Location: admin/dashboard.php");
-        } else {
-            header("Location: user/homepage.php");
-        }
-        exit();
-    } else {
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
         
-        $_SESSION['login_error'] = "Invalid username/email or password.";
+        // 2. Cek Password 
+        if ($password === $user['password']) {
+             // LOGIN SUKSES
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['role'] = $user['role'];
+
+            if ($user['role'] == 'admin') {
+                header("Location: admin/dashboard.php");
+            } else {
+                header("Location: user/homepage.php");
+            }
+            exit();
+        } else {
+            // Password Salah
+            $_SESSION['login_error'] = "Invalid password.";
+            header("Location: login.php");
+            exit();
+        }
+
+    } else {
+        // Username tidak ditemukan
+        $_SESSION['login_error'] = "Invalid username/email.";
         header("Location: login.php");
         exit();
     }
+    
+    $stmt->close();
 }
 ?>
 
