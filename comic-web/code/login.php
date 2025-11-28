@@ -6,25 +6,32 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['role'] == 'admin') {
+        header("Location: admin/dashboard.php");
+    } else {
+        header("Location: user/homepage.php");
+    }
+    exit(); 
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // 1. Prepared statement untuk mencegah SQL Injection
+    // Prepared statement for avoiding SQL Injection
     $stmt = $conn->prepare("SELECT user_id, username, password, role FROM tb_user WHERE username = ? OR email = ?");
-    
     $stmt->bind_param("ss", $username, $username);
     
-    // Jalankan query
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
         
-        // 2. Cek Password 
+        // Password check
         if ($password === $user['password']) {
-             // LOGIN SUKSES
+            // Login succeeds
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['role'] = $user['role'];
 
@@ -35,14 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             exit();
         } else {
-            // Password Salah
+            // Wrong / Invalid password
             $_SESSION['login_error'] = "Invalid password.";
             header("Location: login.php");
             exit();
         }
 
     } else {
-        // Username tidak ditemukan
+        // Username not found
         $_SESSION['login_error'] = "Invalid username/email.";
         header("Location: login.php");
         exit();
