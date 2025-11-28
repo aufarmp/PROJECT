@@ -20,7 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Prepared statement for avoiding SQL Injection
     $stmt = $conn->prepare("SELECT user_id, username, password, role FROM tb_user WHERE username = ? OR email = ?");
     $stmt->bind_param("ss", $username, $username);
     
@@ -30,27 +29,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
         
-        // Password check
         if ($password === $user['password']) {
-            // Login succeeds
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['role'] = $user['role'];
 
+            // JS utk nimpa halaman login dengan halaman dashboard/homepage
+            echo '<script type="text/javascript">';
             if ($user['role'] == 'admin') {
-                header("Location: admin/dashboard.php");
+                echo 'window.location.replace("admin/dashboard.php");';
             } else {
-                header("Location: user/homepage.php");
+                echo 'window.location.replace("user/homepage.php");';
             }
+            echo '</script>';
+            
+            // exit() buat stop eksekusi PHP setelah eksekusi JS
             exit();
+
         } else {
-            // Wrong / Invalid password
+            // Password Salah
             $_SESSION['login_error'] = "Invalid password.";
             header("Location: login.php");
             exit();
         }
 
     } else {
-        // Username not found
+        // Username Salah
         $_SESSION['login_error'] = "Invalid username/email.";
         header("Location: login.php");
         exit();
